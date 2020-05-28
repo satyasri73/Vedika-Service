@@ -5,9 +5,10 @@ node{
    stage('gradle Package'){
      def gradleHome = tool name: 'gradle', type: 'gradle'
      def gradleCMD = "${gradleHome}/bin/gradle"
-     sh "${gradleCMD} clean build"stage('playbook Execution')
-    }  
-     sh label: '', script: '''cd /home/ubuntu/scripts
+     sh "${gradleCMD} clean build"
+    }
+    stage('playbook Execution'){
+     sh label: '', script: '''cd /home/ubuntu
      sudo ansible-playbook main.yaml'''
     }
    }
