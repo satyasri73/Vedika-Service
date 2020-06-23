@@ -24,93 +24,10 @@ sudo apt update -y
 echo Install Docker on Ubuntu 18.04
 sudo apt install docker-ce -y'''
    }
-   
-     stage('Creating Dockerfile'){
-     sh label: '', script: '''cd /var/lib/jenkins/workspace/Docker.pipeline
-     '''
-     sh label: '', script: '''cat >Dockerfile <<\'EOF\'
-     FROM ubuntu
-     COPY ./build/libs/functionhall-service-0.0.1-SNAPSHOT.jar /home/ubuntu/
-     RUN apt-get update -y
-     COPY ./build/libs/vedikaservice.sh /usr/local/bin/
-     COPY  ./build/libs/vedikaservice.service /etc/systemd/system/
-     WORKDIR /home/ubuntu
-     RUN apt install software-properties-common apt-transport-https -y
-     RUN add-apt-repository ppa:openjdk-r/ppa -y
-     RUN apt install openjdk-8-jdk -y
-     RUN chmod +x /usr/local/bin/vedikaservice.sh
-     RUN apt-get install systemd ''
-     EXPOSE 8057
-     '''
-  }
-
-   stage('Creating vedikaservice.sh'){
-sh label: '', script: '''cd /var/lib/jenkins/workspace/Docker.pipeline/build/libs
-cat >vedikaservice.sh <<\'EOF\'
-#!/bin/sh 
-SERVICE_NAME=vedikaservice 
-PATH_TO_JAR=/home/ubuntu/functionhall-service-0.0.1-SNAPSHOT.jar
-PID_PATH_NAME=/tmp/vedikaservice-pid 
-case $1 in 
-start)
-       echo "Starting $SERVICE_NAME ..."
-  if [ ! -f $PID_PATH_NAME ]; then 
-       nohup java -jar $PATH_TO_JAR /tmp 2>> /dev/null >>/dev/null &      
-                   echo $! > $PID_PATH_NAME  
-       echo "$SERVICE_NAME started ..."         
-  else 
-       echo "$SERVICE_NAME is already running ..."
-  fi
-;;
-stop)
-  if [ -f $PID_PATH_NAME ]; then
-         PID=$(cat $PID_PATH_NAME);
-         echo "$SERVICE_NAME stoping ..." 
-         kill $PID;         
-         echo "$SERVICE_NAME stopped ..." 
-         rm $PID_PATH_NAME       
-  else          
-         echo "$SERVICE_NAME is not running ..."   
-  fi    
-;;    
-restart)  
-  if [ -f $PID_PATH_NAME ]; then 
-      PID=$(cat $PID_PATH_NAME);    
-      echo "$SERVICE_NAME stopping ..."; 
-      kill $PID;           
-      echo "$SERVICE_NAME stopped ...";  
-      rm $PID_PATH_NAME     
-      echo "$SERVICE_NAME starting ..."  
-      nohup java -jar $PATH_TO_JAR /tmp 2>> /dev/null >> /dev/null &            
-      echo $! > $PID_PATH_NAME  
-      echo "$SERVICE_NAME started ..."    
-  else           
-      echo "$SERVICE_NAME is not running ..."    
-     fi     ;;
- esac'''
-    }
-	
-	stage('Creating vedikaservice.service'){
-sh label: '', script: '''cd /var/lib/jenkins/workspace/Docker.pipeline/build/libs
-cat >vedikaservice.service <<\'EOF\'
-[Unit]
- Description = Java Service
- After network.target = vedikaservice.service
-[Service]
- Type = forking
- Restart=always
- RestartSec=1
- SuccessExitStatus=143 
- ExecStart = /usr/local/bin/vedikaservice.sh start
- ExecStop = /usr/local/bin/vedikaservice.sh stop
- ExecReload = /usr/local/bin/vedikaservice.sh reload
-[Install]
- WantedBy=multi-user.target'''
-   }
-   
+ 
    stage('ansible installing'){
    sh label: '', script: '''#!/bin/bash
-   echo this script done by shiva
+   echo this script done by satya
    echo Installing software-properties-common packages, then add the java OpenJDK PPA repository.
    sudo apt install software-properties-common apt-transport-https -y
    sudo add-apt-repository ppa:openjdk-r/ppa -y
@@ -129,11 +46,9 @@ cat >vedikaservice.service <<\'EOF\'
    echo Ansible version
    sudo ansible --version'''
    }
-  
-  stage('creating Docker.sh'){
-   sh label: '', script: '''
-   sudo chmod 777 /opt
-  cd /opt/
+   
+ stage('installing Docker'){
+   sh label: '', script: '''cd /opt
 cat >docker.sh <<\'EOF\'
 sudo apt update -y
 sudo apt upgrade -y
@@ -141,7 +56,7 @@ echo Install Prerequisite Packages
 sudo apt-get install curl apt-transport-https ca-certificates software-properties-common -y
 echo Add the Docker Repositories
 echo we add the GPG key, by entering the following command in the command line:
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add - 
 echo Next, we add the repository:
 sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" -y
 echo just update the repository information:
@@ -149,20 +64,27 @@ sudo apt update -y
 echo Install Docker on Ubuntu 18.04
 sudo apt install docker-ce -y'''
    }
-   
-   stage('Back to workspace'){
-   sh label: '', script: 'cd /var/lib/jenkins/workspace/Docker.pipeline'
-   }
-   
-   stage('Creating Image'){
-   sh label: '', script: 'sudo docker build -t vedikaservice .'
+ 
+stage('Docker file'){
+sh label: '', script: '''cd /var/lib/jenkins/workspace/Docker.pipeline'''
+sh label: '', script: '''cat >Dockerfile <<\'EOF\'
+FROM java:8-jdk-alpine
+COPY ./build/libs/functionhall-service-0.0.1-SNAPSHOT.jar /usr/app/
+WORKDIR /usr/app
+EXPOSE 8057
+ENTRYPOINT ["java", "-jar", "functionhall-service-0.0.1-SNAPSHOT.jar"]'''
+}
+ 
+ stage('Creating Image'){
+ sh label: '', script: 'sudo docker build -t service .'
    }
    
    stage('converting Image'){
-   sh label: '', script: 'sudo docker save -o /home/ubuntu/vedikaservice.tar vedikaservice'
+   sh label: '', script: 'sudo docker save -o /home/ubuntu/service.tar service'
    }
-  
-   stage('permissions ansible dir'){
+ 
+ 
+  stage('permissions ansible dir'){
    sh label: '', script: '''sudo chmod 777 /etc/ansible/
    '''
    }
@@ -183,12 +105,12 @@ sudo apt install docker-ce -y'''
    52.66.240.14
    '''
    }
-   
-   stage('creating playbook'){
-   sh label: '', script: '''cd /opt/
+ 
+ stage('creating playbook'){
+ sh label: '', script: '''cd /opt/
 sudo echo "---
 -
-  hosts: 52.66.240.14
+  hosts: 
   tasks:
     vars:
     ansible_python_interpreter: /usr/bin/python3
@@ -196,7 +118,7 @@ sudo echo "---
   
     -
       copy:
-        src:  /home/ubuntu/vedikaservice.tar
+        src:  /home/ubuntu/service.tar
         dest: /home/ubuntu/
     -
       copy:
@@ -207,15 +129,13 @@ sudo echo "---
     -
        shell: sudo sh /home/ubuntu/docker.sh
     -
-       shell: sudo docker load -i /home/ubuntu/vedikaservice.tar
+       shell: sudo docker load -i /home/ubuntu/service.tar
     -
-       shell: sudo docker run -i -t -d -p 8020:8057 --name vedikaservice.container vedikaservice //bin/bash
-    -
-       shell: sudo docker exec vedikaservice.container sh /usr/local/bin/vedikaservice.sh  start" > vedikaservice.yaml'''
+       shell: sudo docker run -i -t -d -p 8057:8057 --name service.container service //bin/bash" > service.yaml'''
   }
       
       stage('execution playbook'){
        sh label: '', script: '''cd /opt/
-       sudo ansible-playbook vedikaservice.yaml'''
+       sudo ansible-playbook service.yaml'''
        }
-}       
+}
