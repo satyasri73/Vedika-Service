@@ -46,7 +46,9 @@ sudo apt install docker-ce -y'''
    echo Ansible version
    sudo ansible --version'''
    }
-   stage('permissions ansible dir'){
+   stage('creating playbook'){
+   sh label: '', script: '''cd /opt/'''
+   stage('permissions ansible dir')
    sh label: '', script: '''sudo chmod 777 /etc/ansible/
    '''
    }
