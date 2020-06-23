@@ -46,7 +46,17 @@ sudo apt install docker-ce -y'''
    echo Ansible version
    sudo ansible --version'''
    }
+   stage('permissions ansible dir'){
+   sh label: '', script: '''sudo chmod 777 /etc/ansible/
+   '''
+   }
    
+   stage('adding ansible hosts'){
+   sh label: '', script: '''cd /etc/ansible
+   cat >inventory <<\'EOF\'
+   52.66.240.14
+   '''
+   }
  stage('installing Docker'){
    sh label: '', script: '''cd /opt
 cat >docker.sh <<\'EOF\'
