@@ -126,7 +126,7 @@ cat >vedikaservice.service <<'EOF'
    sudo npm install -g @angular/cli@9   
    cd /home/ubuntu
    sudo git init
-   sudo git clone https://github.com/shivastunts0327/vedikaUI-angular.git
+   sudo git clone https://github.com/satyasri73/vedikaUI.git
    cd vedikaUI-angular
    sudo npm install
    ng serve --host 0.0.0.0'''
