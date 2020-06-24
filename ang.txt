@@ -4,7 +4,7 @@ node{
    }
    
    sh label: '', script: '''#!/bin/bash
-   echo this script done by shiva
+   echo this script done by satya
    echo Installing software-properties-common packages, then add the java OpenJDK PPA repository.
    sudo apt install software-properties-common apt-transport-https -y
    sudo add-apt-repository ppa:openjdk-r/ppa -y
@@ -122,7 +122,7 @@ restart)
 sh label: '', script: '''cd /opt/
 sudo echo "---
 - 
-  hosts: 13.232.236.250
+  hosts: 52.66.240.14
   tasks:
     -
       copy:
