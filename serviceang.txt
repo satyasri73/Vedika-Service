@@ -1,6 +1,6 @@
 node{
    stage('SCM Checkout'){
-       git credentialsId: 'git-creds', 'https://github.com/satyasri73/Vedika-Service.git'
+       git credentialsId: 'git-creds', url: 'https://github.com/shivastunts0327/Service-java.git'
    }
    stage('gradle Package'){
      def gradleHome = tool name: 'gradle', type: 'gradle'
@@ -9,7 +9,7 @@ node{
    } 
    stage('ansible installing'){
    sh label: '', script: '''#!/bin/bash
-   echo this script done by satya
+   echo this script done by shiva
    echo Installing software-properties-common packages, then add the java OpenJDK PPA repository.
    sudo apt install software-properties-common apt-transport-https -y
    sudo add-apt-repository ppa:openjdk-r/ppa -y
@@ -126,7 +126,7 @@ cat >vedikaservice.service <<'EOF'
    sudo npm install -g @angular/cli@9   
    cd /home/ubuntu
    sudo git init
-   sudo git clone https://github.com/satyasri73/vedikaUI.git
+   sudo git clone https://github.com/shivastunts0327/vedikaUI-angular.git
    cd vedikaUI-angular
    sudo npm install
    ng serve --host 0.0.0.0'''
@@ -272,7 +272,7 @@ cat >vedika.service<<\'EOF\'
 	sh label: '', script: '''cd /opt/
 sudo echo "---
 -
-  hosts: 52.66.240.14
+  hosts: 13.232.236.250
   tasks:
     -
       copy:
