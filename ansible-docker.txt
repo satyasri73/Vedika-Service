@@ -1,6 +1,6 @@
 node{
    stage('SCM Checkout'){
-       git credentialsId: 'git-creds', url: 'https://github.com/satyasri73/Vedika-Service.git'
+       git credentialsId: 'git-creds', url: 'https://github.com/shivastunts0327/Service-java.git'
    }
    
    stage('gradle Package'){
@@ -27,7 +27,7 @@ sudo apt install docker-ce -y'''
  
    stage('ansible installing'){
    sh label: '', script: '''#!/bin/bash
-   echo this script done by satya
+   echo this script done by shiva
    echo Installing software-properties-common packages, then add the java OpenJDK PPA repository.
    sudo apt install software-properties-common apt-transport-https -y
    sudo add-apt-repository ppa:openjdk-r/ppa -y
@@ -66,7 +66,7 @@ sudo apt install docker-ce -y'''
    }
  
 stage('Docker file'){
-sh label: '', script: '''cd /var/lib/jenkins/workspace/docker-pipeline'''
+sh label: '', script: '''cd /var/lib/jenkins/workspace/Docker.pipeline'''
 sh label: '', script: '''cat >Dockerfile <<\'EOF\'
 FROM java:8-jdk-alpine
 COPY ./build/libs/functionhall-service-0.0.1-SNAPSHOT.jar /usr/app/
@@ -102,7 +102,7 @@ ENTRYPOINT ["java", "-jar", "functionhall-service-0.0.1-SNAPSHOT.jar"]'''
    sh label: '', script: '''cd /etc/ansible
    cat >hosts <<\'EOF\'
    [hosts]
-   54.193.10.71
+   52.66.204.33
    '''
    }
  
@@ -110,7 +110,7 @@ ENTRYPOINT ["java", "-jar", "functionhall-service-0.0.1-SNAPSHOT.jar"]'''
  sh label: '', script: '''cd /opt/
 sudo echo "---
 -
-  hosts: 54.193.10.71
+  hosts: 52.66.204.33
   tasks:
     vars:
     ansible_python_interpreter: /usr/bin/python3
